@@ -10,6 +10,6 @@
 
 **Transfer Credit:** CSU, UC, USC.
 
-<img src="cpp.png" alt="Fortran" height="100">
+<img src="cpp.png" alt="CPP" height="100">
 
 ---
