@@ -1,0 +1,6 @@
+one: 19 rolls
+two: 16 rolls
+three: 17 rolls
+four: 19 rolls
+five: 14 rolls
+six: 15 rolls

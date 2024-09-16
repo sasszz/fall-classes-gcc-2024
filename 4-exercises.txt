@@ -1,0 +1,332 @@
+Lucie Chevreuil
+Ch 4 Exercises
+15 September 2024
+
+// ######################################################################################### //
+
+1. If headPtr is a pointer variable that points to the first node of a linked chain of 
+  at least two nodes, write C++ statements that delete the second node and return it to the system.
+
+Node* secondNodePtr = headPtr->next;    	// Get the second node
+secondNodePtr->setItem(headPtr->getItem());   // Replace the second node's data with the first node's data
+Node* nodeToDeletePtr = headPtr;        	// Store the first node for deletion
+headPtr = headPtr->next;                	// Move head pointer to the second node (now first)
+nodeToDeletePtr->setNext(nullptr);      	// Disconnect the first node from the chain
+delete nodeToDeletePtr;                 	// Delete the original first node
+nodeToDeletePtr = nullptr;              	// Return the node to the system
+
+// ######################################################################################### //
+
+2. Revise the public method add in the class LinkedBag so that the new node is inserted 
+   at the end of the linked chain.
+
+### Textbook add fx
+template<class ItemType>
+bool LinkedBag<ItemType>::add(const ItemType& newEntry) {
+    // Create a new node and set its data
+    Node<ItemType>* newNodePtr = new Node<ItemType>();
+    newNodePtr->setItem(newEntry);
+    
+    // Insert the new node at the beginning of the chain
+    newNodePtr->setNext(headPtr); // New node points to the old head
+    headPtr = newNodePtr; // New node is now the first node
+    
+    itemCount++;
+    return true;
+}
+
+### New add fx
+template<class ItemType>
+bool LinkedBag<ItemType>::add(const ItemType& newEntry) {
+	// Create a new node
+	Node<ItemType>* newNodePtr = new Node<ItemType>();
+	newNodePtr->setItem(newEntry);
+	newNodePtr->setNext(nullptr); // The new node will be the last node, so its next is nullptr
+
+	if (isEmpty()) { // If the bag is empty, insert at the beginning
+    	headPtr = newNodePtr; // Head points to the new node
+	} else {
+    	// Traverse the chain to find the last node
+    	Node<ItemType>* currentPtr = headPtr;
+    	while (currentPtr->getNext() != nullptr) {
+        	currentPtr = currentPtr->getNext(); // Move to the next node
+    	}
+    	// Link the last node to the new node
+    	currentPtr->setNext(newNodePtr);
+	}
+
+	itemCount++; // Increment the item count
+	return true; // Item added successfully
+}
+
+// ######################################################################################### //
+
+3. Suppose that the class LinkedBag did not have the data member itemCount. Revise the 
+   method getCurrentSize so that it counts the number of nodes in the linked chain
+
+### Iteratively
+template<class ItemType>
+int LinkedBag<ItemType>::getCurrentSize() const {
+    int count = 0;
+    Node<ItemType>* currentPtr = headPtr; // Start from the head of the chain
+    
+    while (currentPtr != nullptr) {
+        count++;                          // Increment count for each node
+        currentPtr = currentPtr->getNext(); // Move to the next node
+    }
+    
+    return count; // Return the total number of nodes
+}
+
+### Recursively
+template<class ItemType>
+int LinkedBag<ItemType>::getCurrentSizeRecursive(Node<ItemType>* nodePtr) const {
+    if (nodePtr == nullptr) {
+        return 0; // Base case: no more nodes
+    } else {
+        return 1 + getCurrentSizeRecursive(nodePtr->getNext()); // Count current node and recurse
+    }
+}
+
+template<class ItemType>
+int LinkedBag<ItemType>::getCurrentSize() const {
+    return getCurrentSizeRecursive(headPtr); // Call recursive function starting from head
+}
+
+// ######################################################################################### //
+
+4. Revise the public method getFrequencyOf in the class LinkedBag so that it is recursive.
+
+### Textbook getFrequencyOf fx
+template<class ItemType>
+int LinkedBag<ItemType>::getFrequencyOf(const ItemType& anEntry) const {
+    int frequency = 0;
+    int counter = 0;
+    Node<ItemType>* curPtr = headPtr;
+    while ((curPtr != nullptr) && (counter < itemCount)) {
+        if (anEntry == curPtr->getItem()) {
+            frequency++;
+        }
+        counter++;
+        curPtr = curPtr->getNext();
+    }
+    return frequency;
+}
+
+### New Recursive Function
+template<class ItemType>
+class LinkedBag {
+public:
+    int getFrequencyOf(const ItemType& anEntry) const;
+
+private:
+    Node<ItemType>* headPtr;
+    int getFrequencyOfRecursive(Node<ItemType>* nodePtr, const ItemType& anEntry) const;
+};
+
+template<class ItemType>
+int LinkedBag<ItemType>::getFrequencyOf(const ItemType& anEntry) const {
+    return getFrequencyOfRecursive(headPtr, anEntry);
+}
+
+template<class ItemType>
+int LinkedBag<ItemType>::getFrequencyOfRecursive(Node<ItemType>* nodePtr, const ItemType& anEntry) const {
+    if (nodePtr == nullptr) {
+        return 0;
+    } else {
+        return (anEntry == nodePtr->getItem() ? 1 : 0) + getFrequencyOfRecursive(nodePtr->getNext(), anEntry);
+    }
+}
+
+// ######################################################################################### //
+
+5. Add a constructor to the class LinkedBag that creates a bag from a given array of entries.
+
+### Textbook constructor
+LinkedBag(); // Default constructor
+
+template<class ItemType> Node<ItemType>::Node() : next(nullptr) {
+} // end default constructor
+
+### New constructor
+LinkedBag(const ItemType arr[], int size); // Constructor from array
+
+template<class ItemType>
+LinkedBag<ItemType>::LinkedBag(const ItemType arr[], int size) : headPtr(nullptr), itemCount(0) {
+    for (int i = 0; i < size; ++i) {
+        // Insert each item from the array into the bag
+        Node<ItemType>* newNode = new Node<ItemType>(arr[i], headPtr);
+        headPtr = newNode;
+        ++itemCount;
+    }
+}
+
+// ######################################################################################### //
+
+6. Specify and define a method for LinkedBag that removes a random entry from the bag.
+
+### Textbook remove fx
+template<class ItemType>
+bool LinkedBag<ItemType>::remove(const ItemType& anEntry) {
+    Node<ItemType>* entryNodePtr = getPointerTo(anEntry);
+    bool canRemoveItem = !isEmpty() && (entryNodePtr != nullptr);
+    
+    if (canRemoveItem) {
+        // Copy data from first node to located node
+        entryNodePtr->setItem(headPtr->getItem());
+        
+        // Delete first node
+        Node<ItemType>* nodeToDeletePtr = headPtr;
+        headPtr = headPtr->getNext();
+        
+        // Return node to the system
+        nodeToDeletePtr->setNext(nullptr);
+        delete nodeToDeletePtr;
+        nodeToDeletePtr = nullptr;
+        itemCount--;
+    }
+    return canRemoveItem;
+}
+
+### New Random remove fx
+template <typename ItemType>
+ItemType LinkedBag<ItemType>::removeRandom() {
+    int randomIndex = abs(rand() % itemCount);
+    Node<ItemType>* nodePtr = headPtr;
+
+    // Find randomIndex with for loop
+    for (int counter = 0; counter < randomIndex; ++counter) {
+        // Move to next node.
+        nodePtr = nodePtr->getNext();
+    }
+
+    // get content of node that needs to be removed
+    ItemType removedEntry = nodePtr->getItem();
+
+    remove(removedEntry);
+    return removedEntry; // return if removal was successful or not
+}
+
+
+// ######################################################################################### //
+
+7. Compare the number of operations required to display the data in each of the n nodes in 
+   a linked chain with the number of operations required to display each of the n items 
+   in an array.
+
+Both implementations involve O(n) operations for displaying all items because each 
+requires converting all items to a vector and then iterating through the vector. 
+
+Array-Based Implementation:
+Prints current size of the bag
+Converts the bag's items to a vector
+Iterates through the vector and prints each item
+
+void displayBag(ArrayBag<string>& bag) {
+    cout << "The bag contains " << bag.getCurrentSize() << " items:" << endl;
+    vector<string> bagItems = bag.toVector();
+    int numberOfEntries = static_cast<int>(bagItems.size());
+    for (int i = 0; i < numberOfEntries; i++) {
+        cout << bagItems[i] << " ";
+    }
+    cout << endl << endl;
+}
+
+Linked Chain Implementation:
+Prints current size of the bag
+Converts the bag's items to a vector
+Iterates through the vector and prints each item
+
+void displayBag(BagInterface<string>* bagPtr) {
+    cout << "The bag contains " << bagPtr->getCurrentSize() << " items:" << endl;
+    vector<string> bagItems;
+    bagPtr->toVector(bagItems);
+    int numberOfEntries = bagItems.size();
+    for (int i = 0; i < numberOfEntries; i++) {
+        cout << bagItems[i] << " ";
+    }
+    cout << endl << endl;
+}
+
+// ######################################################################################### //
+
+8. Compare the number of operations required to display the data in the nth node in a linked 
+   chain with the number of operations required to display the nth item in an array.
+
+Array-based would be faster.
+
+Array-Based Implementation:
+Access Time: Constant time, O(1), for any item. Whether accessing items[0] or items[49], 
+the time required is the same.
+
+Linked Chain Implementation:
+Access Time: Linear time, O(i), where i is the index of the item. To access the ith item, 
+you must traverse from the head node to the ith node, which takes more time as i increases.
+   
+// ######################################################################################### //
+
+9. Compare the array-based and link-based implementations of the ADT bag operation 
+   remove(anEntry). Consider the various locations of anEntry within the array or chain.
+
+Array-based implementation can be more efficient in cases where the entry is towards the 
+end of the array. If the item is near the head, linked list might be more efficient.
+
+Array-Based Implementation:
+O(i) - Traverse array until we encounter anEntry
+O(1) - After locating anEntry in items[index], we copy the entry in items[itemCount - 1] to items[index]
+O(1) - We then ignore the entry in items[itemCount - 1] by decrementing itemCount.
+
+Linked Chain Implementation:
+O(n) - Find the node that contains anEntry
+O(1) - Replace anEntry with the entry that is in the first node
+O(1) - Delete the first node
+
+
+// ######################################################################################### //
+
+10. In a doubly linked chain, each node can point to the previous node as well as to the 
+    next node. Figure 4-9 shows a doubly linked chain and its head pointer. Define a class 
+    to represent a node in a doubly linked chain.
+
+template<class ItemType>
+class DoubleNode
+{
+private:
+    ItemType data; // data of node
+    DoubleNode<ItemType>* next;
+    DoubleNode<ItemType>* prev; // NEW pointer to previous node 
+public:
+    DoubleNode();
+    DoubleNode(const ItemType& anItem);
+    DoubleNode(const ItemType& anItem, Node<ItemType>* nextNodePtr, Node<ItemType>* prevNodePtr);
+    void setItem(const ItemType& anItem);
+    void setNext(Node<ItemType>* nextNodePtr);
+    void setPrev(Node<ItemType>* prevNodePtr);
+    ItemType getItem() const ;  
+    Node<ItemType>* getNext() const ;
+    Node<ItemType>* getPrev() const ;
+};
+
+// ######################################################################################### //
+
+11. List the steps necessary to add a node to the beginning of the doubly linked chain shown 
+    in Figure 4-9.
+
+Create a new node 
+Check if list is empty
+Set new node's next to the current head
+Update the current head's prev to the new Node
+
+// ######################################################################################### //
+
+12. List the steps necessary to remove the first node from the beginning of the doubly linked 
+    chain shown in Figure 4-9.
+
+Check if list is empty
+Store the current head node in a temporary variable called temp
+Update the head pointer to the next node in the list
+Set the prev pointer of the new head node to nullptr
+Delete node stored in temp
+
+// ######################################################################################### //
+
