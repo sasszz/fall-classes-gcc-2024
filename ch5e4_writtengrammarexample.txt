@@ -1,0 +1,10 @@
+ch5 exercise 4
+lucie chevreuil
+
+Problem: Consider a language of character strings that contain only dots and dashes. All strings in this language contain at least four characters and begin with either two dots or two dashes. If the first two characters are dots, the last one must be a dash; if the first two characters are dashes, the last one must be a dot. Write a recursive grammar for this language.
+
+String (<S>) has to start with -- or .. and end with . or -
+<S> -> .. <E> - | -- <E> .
+
+Middle part (<E>) can be any combo of . or -
+<E> -> . <E> | - <E> | . | - 
