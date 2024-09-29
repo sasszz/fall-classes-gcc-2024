@@ -1,0 +1,21 @@
+Discuss the advantages and disadvantages of an array-based implementation of the ADT stack as compared to a link-based implementation
+
+Array-Based Implementation:
+
+Pros:
+- Easy to implement (compiler provides constructors/destructors).
+- Best for fixed-size stacks.
+
+Cons:
+- Wastes memory if the array is too large.
+- Resizing the array takes time if the stack grows.
+
+Link-Based Implementation:
+
+Pros:
+- Allows dynamic resizing without performance issues.
+- No need to allocate excess memory upfront.
+
+Cons:
+- Requires manual memory management (no automatic copy constructor/destructor).
+.
