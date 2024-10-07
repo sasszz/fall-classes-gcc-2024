@@ -6,3 +6,5 @@
 //
 
 #include "Node.hpp"
+
+Node::Node(int value) : key(value), left(nullptr), right(nullptr) {}
